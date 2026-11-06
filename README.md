@@ -60,10 +60,10 @@ Cada ejecución guarda una simulación y cuatro resultados (Heun y RK4 para cada
 
 ## Publicar y entregar
 
-**Aplicación publicada:** [AdoptaMath en Netlify](https://gregarious-pika-9c7a70.netlify.app/)  
+**Aplicación publicada:** [AdoptaMath en GitHub Pages](https://erickmmj.github.io/AdoptaMath/)  
 **Código fuente:** [github.com/ERICKMMJ/AdoptaMath](https://github.com/ERICKMMJ/AdoptaMath) (repositorio público).
 
-La aplicación se publicó manualmente con Netlify Drop. El sitio y el código son públicos. Esta publicación manual no se actualiza al cambiar el repositorio; para publicar cambios, vuelve a desplegar la carpeta del proyecto en Netlify.
+GitHub Pages publica automáticamente la carpeta raíz de la rama `main`; al subir cambios a esa rama, el sitio se vuelve a desplegar. La publicación puede tardar unos minutos en reflejarse.
 
 El historial permite abrir el detalle completo de cada experimento guardado: parámetros, gráficas de evolución y error, tabla comparativa, iteraciones e interpretación.
 
