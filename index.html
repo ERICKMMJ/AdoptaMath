@@ -171,7 +171,40 @@
 
       <dialog id="historyDetailDialog" class="detail-dialog">
         <div class="panel-heading"><div><p class="eyebrow">EXPERIMENTO GUARDADO</p><h3 id="historyDetailTitle">Detalle de simulación</h3></div><button class="button button-secondary" id="closeHistoryDetail" type="button" aria-label="Cerrar detalle">Cerrar</button></div>
-        <div id="historyDetailContent" class="table-scroll"></div>
+        <p id="historyDetailParameters" class="muted"></p>
+        <p id="historyDetailMessage" class="form-message" role="status"></p>
+        <div id="historyDetailContent" class="history-detail-content hidden">
+          <div class="stats-grid result-stats">
+            <article class="stat-card"><span class="stat-label">Solución analítica final</span><strong id="historyDetailExact">—</strong><span class="stat-foot">Adopciones estimadas</span></article>
+            <article class="stat-card"><span class="stat-label">Error absoluto menor</span><strong id="historyDetailBestError">—</strong><span class="stat-foot" id="historyDetailBestMethod">Entre los métodos guardados</span></article>
+            <article class="stat-card"><span class="stat-label">Tiempo de cálculo</span><strong id="historyDetailCalculationTime">—</strong><span class="stat-foot" id="historyDetailCalculationNote">—</span></article>
+          </div>
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">EVOLUCIÓN EN EL TIEMPO</p><h3>Solución exacta vs. métodos numéricos</h3></div></div>
+            <div class="chart-wrap"><canvas id="historyDetailComparisonChart"></canvas></div>
+          </article>
+          <article class="panel chart-panel">
+            <div class="panel-heading"><div><p class="eyebrow">PRECISIÓN EN CADA ITERACIÓN</p><h3>Error absoluto durante la simulación</h3></div></div>
+            <div class="chart-wrap"><canvas id="historyDetailErrorChart"></canvas></div>
+          </article>
+          <article class="panel table-panel">
+            <div class="panel-heading"><div><p class="eyebrow">DETALLE DE PRECISIÓN</p><h3>Resultados al tiempo final</h3></div></div>
+            <div class="table-scroll"><table><thead><tr><th>Método</th><th>Paso (meses)</th><th>Iteraciones</th><th>Aproximación final</th><th>Solución exacta</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="historyDetailResultsTable"></tbody></table></div>
+          </article>
+          <article class="panel table-panel">
+            <div class="panel-heading iteration-heading">
+              <div><p class="eyebrow">DESGLOSE PASO A PASO</p><h3>Tabla de iteraciones</h3></div>
+              <label class="iteration-picker">Método y tamaño de paso<select id="historyDetailIterationSelect" aria-label="Método y tamaño de paso del historial"></select></label>
+            </div>
+            <div class="table-scroll"><table><thead><tr><th>Iteración</th><th>Tiempo t (meses)</th><th>Solución analítica</th><th>Aproximación numérica</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="historyDetailIterationsTable"></tbody></table></div>
+          </article>
+          <article class="panel interpretation-panel">
+            <p class="eyebrow">INTERPRETACIÓN Y CONCLUSIONES</p>
+            <h3>¿Qué significan estos resultados?</h3>
+            <p id="historyDetailInterpretation" class="muted"></p>
+            <p class="context-note"><strong>Limitaciones:</strong> el modelo supone una tasa constante, una meta fija y adopciones acumuladas sin devoluciones. No representa cambios estacionales, disponibilidad de animales ni otros factores sociales.</p>
+          </article>
+        </div>
       </dialog>
 
       <footer class="main-footer">AdoptaMath · Proyecto académico de métodos numéricos</footer>

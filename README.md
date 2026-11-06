@@ -49,38 +49,31 @@ El modelo supone una meta y una tasa constantes, adopciones acumuladas y ausenci
 
 ## Configurar Supabase
 
-
 1. Crea un proyecto en Supabase y copia su Project URL y clave pública `sb_publishable_`.
 2. Pega esos valores en `js/supabase.js`.
 3. En Supabase, abre **SQL Editor** y ejecuta `database/esquema.sql`.
 4. Comprueba en **Table Editor** que existan `simulaciones` y `resultados`.
 
-
 El esquema activa RLS y permite lectura e inserción públicas para el prototipo académico. Los registros y parámetros son visibles para cualquiera que pueda acceder a la aplicación. No guardes datos sensibles. Para una aplicación de producción, agrega autenticación y políticas por usuario. Nunca uses una clave `sb_secret_` ni `service_role` en el frontend.
-
 
 Cada ejecución guarda una simulación y cuatro resultados (Heun y RK4 para cada paso). El índice único evita repetir el mismo método y paso dentro de una simulación.
 
-
 ## Publicar y entregar
 
+**Aplicación publicada:** [AdoptaMath en Netlify](https://gregarious-pika-9c7a70.netlify.app/)  
+**Código fuente:** [github.com/ERICKMMJ/AdoptaMath](https://github.com/ERICKMMJ/AdoptaMath) (repositorio público).
 
-Repositorio objetivo: [github.com/ERICKMMJ/AdoptaMath](https://github.com/ERICKMMJ/AdoptaMath).
+La aplicación se publicó manualmente con Netlify Drop. El sitio y el código son públicos. Esta publicación manual no se actualiza al cambiar el repositorio; para publicar cambios, vuelve a desplegar la carpeta del proyecto en Netlify.
 
+El historial permite abrir el detalle completo de cada experimento guardado: parámetros, gráficas de evolución y error, tabla comparativa, iteraciones e interpretación.
 
-Después de subir el código al repositorio:
+El sitio desplegado es público. La política RLS actual de Supabase también permite lectura e inserción anónimas para la demostración; no la uses para información sensible ni asumas que los registros son privados.
 
-
-1. En GitHub, habilita **Settings > Pages** y publica desde la rama `main`, carpeta `/root`, si usarás GitHub Pages; o conecta el repositorio a Netlify.
-2. Verifica que la URL pública cargue la aplicación y que las variables de Supabase sean correctas.
-3. Para la entrega académica, presenta los enlaces de la app y del repositorio, y un video explicativo de un minuto. Identifica la entrega con tu nombre completo, el título del desafío y la materia. La fecha límite indicada en el PDF es el viernes 6 de noviembre de 2026.
-
+Para la entrega académica, presenta los enlaces de la app y del repositorio, y un video explicativo de un minuto. Identifica la entrega con tu nombre completo, el título del desafío y la materia. La fecha límite indicada en el PDF es el viernes 6 de noviembre de 2026.
 
 En el video, resume el problema comunitario, la EDO y su condición inicial; explica brevemente Heun, RK4 y la solución analítica; muestra la aplicación y cierra con los resultados y conclusiones.
 
-
 ## Estructura
-
 
 ```text
 AdoptaMath/
@@ -96,10 +89,3 @@ AdoptaMath/
 │   └── esquema.sql
 └── README.md
 ```
-
-## Aplicación publicada
-
-**Aplicación pública:** [AdoptaMath en Netlify](https://gregarious-pika-9c7a70.netlify.app/)  
-**Código fuente:** [ERICKMMJ/AdoptaMath](https://github.com/ERICKMMJ/AdoptaMath) (repositorio privado).
-
-El sitio se publica en Netlify; el repositorio sigue privado. Los despliegues hechos con Netlify Drop son manuales y no se actualizan automáticamente al cambiar el código. La página es pública y la configuración actual de Supabase permite lectura e inserción anónimas; no almacenar datos sensibles.
