@@ -1,6 +1,8 @@
 (() => {
   const $ = (id) => document.getElementById(id);
   const charts = {};
+  const rowsPerPage = 15;
+  const tablePages = {};
 
   const views = {
     inicio: { title: "Resumen general", id: "view-inicio" },
@@ -102,6 +104,64 @@
     row.appendChild(cell);
   }
 
+  function renderPaginatedRows(bodyId, rows) {
+    const body = $(bodyId);
+    const pagination = $(`${bodyId}Pagination`);
+    const pageCount = Math.ceil(rows.length / rowsPerPage);
+    const page = Math.min(tablePages[bodyId] || 1, pageCount || 1);
+    tablePages[bodyId] = page;
+    body.replaceChildren(...rows.slice((page - 1) * rowsPerPage, page * rowsPerPage));
+
+    pagination.replaceChildren();
+    pagination.classList.toggle("hidden", rows.length <= rowsPerPage);
+    if (rows.length <= rowsPerPage) return;
+
+    const range = document.createElement("span");
+    range.className = "table-pagination-status";
+    range.setAttribute("aria-live", "polite");
+    range.textContent =
+      `Mostrando ${(page - 1) * rowsPerPage + 1}–${Math.min(page * rowsPerPage, rows.length)} de ${rows.length} · Página ${page} de ${pageCount}`;
+
+    const previous = document.createElement("button");
+    previous.type = "button";
+    previous.className = "button button-secondary button-small";
+    previous.textContent = "Anterior";
+    previous.disabled = page === 1;
+    previous.setAttribute("aria-label", "Página anterior");
+    previous.addEventListener("click", () => {
+      tablePages[bodyId] = page - 1;
+      renderPaginatedRows(bodyId, rows);
+    });
+
+    const next = document.createElement("button");
+    next.type = "button";
+    next.className = "button button-secondary button-small";
+    next.textContent = "Siguiente";
+    next.disabled = page === pageCount;
+    next.setAttribute("aria-label", "Página siguiente");
+    next.addEventListener("click", () => {
+      tablePages[bodyId] = page + 1;
+      renderPaginatedRows(bodyId, rows);
+    });
+
+    pagination.append(previous, range, next);
+  }
+
+  function setTableMessage(bodyId, message) {
+    tablePages[bodyId] = 1;
+    const body = $(bodyId);
+    const row = document.createElement("tr");
+    const cell = document.createElement("td");
+    cell.colSpan = 8;
+    cell.className = "empty-cell";
+    cell.textContent = message;
+    row.appendChild(cell);
+    body.replaceChildren(row);
+    const pagination = $(`${bodyId}Pagination`);
+    pagination.replaceChildren();
+    pagination.classList.add("hidden");
+  }
+
   function renderComparisonChart(values, records, canvasId = "comparisonChart") {
     const colors = { Heun: "#e4a64d", RK4: "#548bd1" };
     const exactRecord = records.reduce((best, record) => record.h < best.h ? record : best);
@@ -176,9 +236,7 @@
   }
 
   function renderSummaryTable(records, exact, bodyId = "resultsTable") {
-    const body = $(bodyId);
-    body.replaceChildren();
-    records.forEach(record => {
+    const rows = records.map(record => {
       const last = record.points[record.points.length - 1];
       const row = document.createElement("tr");
       [
@@ -190,14 +248,13 @@
         formatNumber(last.error, 10),
         last.errorRelativoPorcentual === null ? "—" : formatNumber(last.errorRelativoPorcentual, 6)
       ].forEach(value => appendCell(row, String(value)));
-      body.appendChild(row);
+      return row;
     });
+    renderPaginatedRows(bodyId, rows);
   }
 
   function renderIterationTable(record, bodyId = "iterationsTable") {
-    const body = $(bodyId);
-    body.replaceChildren();
-    record.points.forEach((point, index) => {
+    const rows = record.points.map((point, index) => {
       const row = document.createElement("tr");
       [
         index,
@@ -207,8 +264,9 @@
         formatNumber(point.error, 10),
         point.errorRelativoPorcentual === null ? "—" : formatNumber(point.errorRelativoPorcentual, 6)
       ].forEach(value => appendCell(row, String(value)));
-      body.appendChild(row);
+      return row;
     });
+    renderPaginatedRows(bodyId, rows);
   }
 
   function renderInterpretation(values, records, exact, ids = {}) {
@@ -428,10 +486,10 @@
 
   async function loadHistory() {
     const body = $("historyTable");
-    body.innerHTML = '<tr><td colspan="8" class="empty-cell">Cargando historial...</td></tr>';
+    setTableMessage("historyTable", "Cargando historial...");
     $("historyMessage").textContent = "";
     if (!window.db) {
-      body.innerHTML = '<tr><td colspan="8" class="empty-cell">Configura Supabase en js/supabase.js.</td></tr>';
+      setTableMessage("historyTable", "Configura Supabase en js/supabase.js.");
       return;
     }
     const { data, error } = await db
@@ -440,17 +498,17 @@
       .order("created_at", { ascending: false })
       .limit(100);
     if (error) {
-      body.innerHTML = '<tr><td colspan="8" class="empty-cell">No se pudo cargar el historial.</td></tr>';
+      setTableMessage("historyTable", "No se pudo cargar el historial.");
       $("historyMessage").textContent = error.message;
       $("historyMessage").className = "form-message error";
       return;
     }
     body.replaceChildren();
     if (!data.length) {
-      body.innerHTML = '<tr><td colspan="8" class="empty-cell">Todavía no hay simulaciones guardadas.</td></tr>';
+      setTableMessage("historyTable", "Todavía no hay simulaciones guardadas.");
       return;
     }
-    data.forEach(item => {
+    const rows = data.map(item => {
       const row = document.createElement("tr");
       const date = item.created_at ? new Date(item.created_at).toLocaleString("es-BO") : "—";
       [
@@ -475,8 +533,9 @@
       detailButton.addEventListener("click", () => showHistoryDetail(item));
       detailCell.appendChild(detailButton);
       row.appendChild(detailCell);
-      body.appendChild(row);
+      return row;
     });
+    renderPaginatedRows("historyTable", rows);
   }
 
   async function loadDashboard() {
