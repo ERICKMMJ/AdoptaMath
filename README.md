@@ -37,6 +37,7 @@ Su derivada es \(k(A_{\max}-A_0)e^{-kt}=k(A_{\max}-A(t))\), y al evaluar \(t=0\)
 - Los dos métodos usan el mismo intervalo, parámetros y condición inicial; se pueden comparar con dos tamaños de paso distintos.
 - Se muestran curvas analíticas y numéricas, error absoluto y error relativo porcentual (cuando la solución exacta no es cero).
 - La tabla de iteraciones permite revisar cada tiempo calculado; la tabla de resumen compara los resultados finales.
+- Las tablas muestran hasta 15 filas por página y agregan controles de paginación cuando hay más registros.
 - Se presenta una interpretación automática del resultado y el tiempo empleado únicamente en los cálculos numéricos.
 
 El modelo supone una meta y una tasa constantes, adopciones acumuladas y ausencia de devoluciones. No considera estacionalidad, disponibilidad de animales, cambios en las campañas ni otros factores sociales. La interpretación es matemática y no una predicción de adopciones reales.
