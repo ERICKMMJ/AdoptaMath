@@ -1,7 +1,6 @@
 (() => {
   const $ = (id) => document.getElementById(id);
-  let comparisonChart = null;
-  let errorChart = null;
+  const charts = {};
 
   const views = {
     inicio: { title: "Resumen general", id: "view-inicio" },
@@ -103,7 +102,7 @@
     row.appendChild(cell);
   }
 
-  function renderComparisonChart(values, records) {
+  function renderComparisonChart(values, records, canvasId = "comparisonChart") {
     const colors = { Heun: "#e4a64d", RK4: "#548bd1" };
     const exactRecord = records.reduce((best, record) => record.h < best.h ? record : best);
     const datasets = [{
@@ -125,8 +124,8 @@
       tension: 0
     }));
 
-    if (comparisonChart) comparisonChart.destroy();
-    comparisonChart = new Chart($("comparisonChart"), {
+    if (charts[canvasId]) charts[canvasId].destroy();
+    charts[canvasId] = new Chart($(canvasId), {
       type: "line",
       data: { datasets },
       options: {
@@ -145,7 +144,7 @@
     });
   }
 
-  function renderErrorChart(records, finalTime) {
+  function renderErrorChart(records, finalTime, canvasId = "errorChart") {
     const colors = { Heun: "#e4a64d", RK4: "#548bd1" };
     const datasets = records.map(record => ({
       label: `${record.method} (h=${record.h} meses)`,
@@ -156,8 +155,8 @@
       pointRadius: 0,
       tension: 0
     }));
-    if (errorChart) errorChart.destroy();
-    errorChart = new Chart($("errorChart"), {
+    if (charts[canvasId]) charts[canvasId].destroy();
+    charts[canvasId] = new Chart($(canvasId), {
       type: "line",
       data: { datasets },
       options: {
@@ -176,8 +175,8 @@
     });
   }
 
-  function renderSummaryTable(records, exact) {
-    const body = $("resultsTable");
+  function renderSummaryTable(records, exact, bodyId = "resultsTable") {
+    const body = $(bodyId);
     body.replaceChildren();
     records.forEach(record => {
       const last = record.points[record.points.length - 1];
@@ -195,8 +194,8 @@
     });
   }
 
-  function renderIterationTable(record) {
-    const body = $("iterationsTable");
+  function renderIterationTable(record, bodyId = "iterationsTable") {
+    const body = $(bodyId);
     body.replaceChildren();
     record.points.forEach((point, index) => {
       const row = document.createElement("tr");
@@ -212,18 +211,21 @@
     });
   }
 
-  function renderInterpretation(values, records, exact) {
+  function renderInterpretation(values, records, exact, ids = {}) {
+    const textId = ids.text || "interpretationText";
+    const errorId = ids.error || "bestError";
+    const methodId = ids.method || "bestMethod";
     const best = records.reduce((current, record) => {
       const error = record.points[record.points.length - 1].error;
       return error < current.error ? { record, error } : current;
     }, { record: records[0], error: records[0].points[records[0].points.length - 1].error });
     const reached = values.Amax === 0 ? 0 : (exact / values.Amax) * 100;
-    $("interpretationText").textContent =
+    $(textId).textContent =
       `Con los supuestos ingresados, la solución analítica estima ${formatNumber(exact, 2)} adopciones acumuladas al cabo de ${values.T} meses, aproximadamente ${formatNumber(reached, 2)}% de la meta. ` +
       `${best.record.method} con h=${best.record.h} meses obtuvo el menor error absoluto final (${formatNumber(best.error, 10)} adopciones) en esta comparación. ` +
       `Al reducir h, normalmente mejora la aproximación, aunque aumenta el número de cálculos. Estos resultados describen el modelo, no garantizan el comportamiento real de una campaña.`;
-    $("bestError").textContent = formatNumber(best.error, 8);
-    $("bestMethod").textContent = `${best.record.method}, h = ${best.record.h} meses`;
+    $(errorId).textContent = formatNumber(best.error, 8);
+    $(methodId).textContent = `${best.record.method}, h = ${best.record.h} meses`;
   }
 
   function renderResults(values, result, durationMs) {
@@ -320,7 +322,11 @@
 
   async function showHistoryDetail(simulation) {
     $("historyDetailTitle").textContent = simulation.nombre;
-    $("historyDetailContent").textContent = "Cargando resultados...";
+    $("historyDetailParameters").textContent =
+      `A₀ = ${simulation.adopciones_iniciales} adopciones · Meta = ${simulation.meta_maxima} adopciones · k = ${simulation.tasa_adopcion} mes⁻¹ · Tiempo = ${simulation.tiempo_final} meses`;
+    $("historyDetailContent").classList.add("hidden");
+    $("historyDetailMessage").textContent = "Cargando resultados guardados...";
+    $("historyDetailMessage").className = "form-message";
     $("historyDetailDialog").showModal();
     const { data, error } = await db
       .from("resultados")
@@ -328,30 +334,96 @@
       .eq("simulacion_id", simulation.id)
       .order("paso", { ascending: true });
     if (error) {
-      $("historyDetailContent").textContent = `No se pudieron cargar los resultados: ${error.message}`;
+      $("historyDetailMessage").textContent = `No se pudieron cargar los resultados: ${error.message}`;
+      $("historyDetailMessage").className = "form-message error";
       return;
     }
-    const table = document.createElement("table");
-    table.innerHTML = "<thead><tr><th>Método</th><th>Paso (meses)</th><th>Iteraciones</th><th>Resultado final</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead>";
-    const body = document.createElement("tbody");
-    data.forEach(item => {
-      const points = item.datos?.puntos || [];
-      const last = points[points.length - 1];
-      const row = document.createElement("tr");
-      [
-        item.metodo,
-        item.paso,
-        item.datos?.iteraciones ?? Math.max(0, points.length - 1),
-        last ? formatNumber(last.aproximacion) : "—",
-        last ? formatNumber(last.error, 10) : "—",
-        last?.errorRelativoPorcentual == null ? "—" : formatNumber(last.errorRelativoPorcentual, 6)
-      ].forEach(value => appendCell(row, String(value)));
-      body.appendChild(row);
+    const records = data.map(item => {
+      const points = item.datos?.puntos;
+      if (!Array.isArray(points) || points.length === 0 || !["Heun", "RK4"].includes(item.metodo)) {
+        return null;
+      }
+      return {
+        method: item.metodo,
+        h: Number(item.paso),
+        points: points.map(point => {
+          const exacta = Number(point.exacta);
+          const aproximacion = Number(point.aproximacion);
+          const error = Number.isFinite(Number(point.error))
+            ? Number(point.error)
+            : Math.abs(exacta - aproximacion);
+          const relative = point.errorRelativoPorcentual;
+          return {
+            t: Number(point.t),
+            exacta,
+            aproximacion,
+            error,
+            errorRelativoPorcentual: relative == null
+              ? (exacta === 0 ? null : error / Math.abs(exacta) * 100)
+              : Number(relative)
+          };
+        })
+      };
+    }).filter(record => record && Number.isFinite(record.h) &&
+      record.points.every(point =>
+        [point.t, point.exacta, point.aproximacion, point.error].every(Number.isFinite) &&
+        (point.errorRelativoPorcentual === null || Number.isFinite(point.errorRelativoPorcentual))
+      ));
+
+    if (records.length === 0) {
+      $("historyDetailMessage").textContent = data.length
+        ? "Los resultados guardados no contienen puntos válidos para mostrar."
+        : "Esta simulación no tiene resultados guardados.";
+      $("historyDetailMessage").className = "form-message";
+      return;
+    }
+
+    const exact = AdoptaMathMethods.solucionExacta(
+      Number(simulation.tiempo_final),
+      Number(simulation.adopciones_iniciales),
+      Number(simulation.tasa_adopcion),
+      Number(simulation.meta_maxima)
+    );
+    const values = {
+      A0: Number(simulation.adopciones_iniciales),
+      Amax: Number(simulation.meta_maxima),
+      k: Number(simulation.tasa_adopcion),
+      T: Number(simulation.tiempo_final)
+    };
+
+    $("historyDetailExact").textContent = formatNumber(exact, 6);
+    $("historyDetailCalculationTime").textContent = "No registrado";
+    $("historyDetailCalculationNote").textContent = "El tiempo no se guardó con esta simulación";
+    renderSummaryTable(records, exact, "historyDetailResultsTable");
+    renderComparisonChart(values, records, "historyDetailComparisonChart");
+    renderErrorChart(records, values.T, "historyDetailErrorChart");
+    renderInterpretation(values, records, exact, {
+      text: "historyDetailInterpretation",
+      error: "historyDetailBestError",
+      method: "historyDetailBestMethod"
     });
-    table.appendChild(body);
-    const content = $("historyDetailContent");
-    content.replaceChildren(table);
-    if (data.length === 0) content.textContent = "Esta simulación no tiene resultados guardados.";
+
+    const select = $("historyDetailIterationSelect");
+    select.replaceChildren();
+    records.forEach((record, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = `${record.method}, h = ${record.h} meses`;
+      select.appendChild(option);
+    });
+    select.onchange = () => renderIterationTable(
+      records[Number(select.value)],
+      "historyDetailIterationsTable"
+    );
+    renderIterationTable(records[0], "historyDetailIterationsTable");
+    $("historyDetailMessage").textContent =
+      `Mostrando ${records.length} conjuntos de resultados guardados.`;
+    $("historyDetailMessage").className = "form-message success";
+    $("historyDetailContent").classList.remove("hidden");
+    requestAnimationFrame(() => {
+      charts.historyDetailComparisonChart?.resize();
+      charts.historyDetailErrorChart?.resize();
+    });
   }
 
   async function loadHistory() {
