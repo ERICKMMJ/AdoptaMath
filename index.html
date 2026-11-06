@@ -144,6 +144,7 @@
           <article class="panel table-panel">
             <div class="panel-heading"><div><p class="eyebrow">DETALLE DE PRECISIÓN</p><h3>Resultados al tiempo final</h3></div></div>
             <div class="table-scroll"><table><thead><tr><th>Método</th><th>Paso (meses)</th><th>Iteraciones</th><th>Aproximación final</th><th>Solución exacta</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="resultsTable"></tbody></table></div>
+            <nav class="table-pagination hidden" id="resultsTablePagination" aria-label="Paginación de resultados"></nav>
           </article>
           <article class="panel table-panel">
             <div class="panel-heading iteration-heading">
@@ -151,6 +152,7 @@
               <label class="iteration-picker">Método y tamaño de paso<select id="iterationSelect" aria-label="Método y tamaño de paso para la tabla de iteraciones"></select></label>
             </div>
             <div class="table-scroll"><table><thead><tr><th>Iteración</th><th>Tiempo t (meses)</th><th>Solución analítica</th><th>Aproximación numérica</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="iterationsTable"></tbody></table></div>
+            <nav class="table-pagination hidden" id="iterationsTablePagination" aria-label="Paginación de iteraciones"></nav>
           </article>
           <article class="panel interpretation-panel">
             <p class="eyebrow">INTERPRETACIÓN Y CONCLUSIONES</p>
@@ -165,6 +167,7 @@
         <div class="section-intro"><div><p class="eyebrow">BASE DE DATOS SUPABASE</p><h2>Historial de simulaciones</h2><p class="muted">Consulta los experimentos que has guardado.</p></div><button class="button button-secondary" id="refreshHistory">↻ Actualizar</button></div>
         <article class="panel table-panel">
           <div class="table-scroll"><table><thead><tr><th>ID</th><th>Nombre</th><th>A₀</th><th>Meta</th><th>Tasa (mes⁻¹)</th><th>Tiempo (meses)</th><th>Fecha</th><th>Detalle</th></tr></thead><tbody id="historyTable"><tr><td colspan="8" class="empty-cell">Cargando historial...</td></tr></tbody></table></div>
+          <nav class="table-pagination hidden" id="historyTablePagination" aria-label="Paginación del historial"></nav>
         </article>
         <p class="form-message" id="historyMessage" role="status"></p>
       </section>
@@ -190,6 +193,7 @@
           <article class="panel table-panel">
             <div class="panel-heading"><div><p class="eyebrow">DETALLE DE PRECISIÓN</p><h3>Resultados al tiempo final</h3></div></div>
             <div class="table-scroll"><table><thead><tr><th>Método</th><th>Paso (meses)</th><th>Iteraciones</th><th>Aproximación final</th><th>Solución exacta</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="historyDetailResultsTable"></tbody></table></div>
+            <nav class="table-pagination hidden" id="historyDetailResultsTablePagination" aria-label="Paginación de resultados guardados"></nav>
           </article>
           <article class="panel table-panel">
             <div class="panel-heading iteration-heading">
@@ -197,6 +201,7 @@
               <label class="iteration-picker">Método y tamaño de paso<select id="historyDetailIterationSelect" aria-label="Método y tamaño de paso del historial"></select></label>
             </div>
             <div class="table-scroll"><table><thead><tr><th>Iteración</th><th>Tiempo t (meses)</th><th>Solución analítica</th><th>Aproximación numérica</th><th>Error absoluto</th><th>Error relativo (%)</th></tr></thead><tbody id="historyDetailIterationsTable"></tbody></table></div>
+            <nav class="table-pagination hidden" id="historyDetailIterationsTablePagination" aria-label="Paginación de iteraciones guardadas"></nav>
           </article>
           <article class="panel interpretation-panel">
             <p class="eyebrow">INTERPRETACIÓN Y CONCLUSIONES</p>
