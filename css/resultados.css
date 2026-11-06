@@ -78,9 +78,37 @@
   min-width: 0;
 }
 
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.table-pagination-status {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.table-pagination button:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
 @media (max-width: 720px) {
   .iteration-heading {
     flex-direction: column;
+  }
+
+  .table-pagination {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .table-pagination-status {
+    flex-basis: 100%;
   }
 
   .iteration-picker,
