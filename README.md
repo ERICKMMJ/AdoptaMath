@@ -10,25 +10,21 @@ Los parámetros ingresados son supuestos de simulación, no predicciones comprob
 
 ## Modelo matemático
 
-Se modela la cantidad acumulada de adopciones con:
+Para representar el avance de una campaña, usamos una ecuación que supone que las adopciones aumentan más rápido cuando todavía quedan muchas mascotas por adoptar:
 
-\[
+$$
 \frac{dA}{dt}=k(A_{\max}-A), \qquad A(0)=A_0
-\]
+$$
 
-- \(A(t)\): adopciones acumuladas (adopciones).
-- \(t\): tiempo (meses).
-- \(A_0\): adopciones iniciales (adopciones).
-- \(A_{\max}\): meta máxima (adopciones).
-- \(k\): tasa de adopción (mes\(^{-1}\)).
+En esta ecuación, \(A(t)\) representa las adopciones acumuladas después de \(t\) meses. \(A_0\) es el número de adopciones al inicio, \(A_{\max}\) es la meta y \(k\) indica la tasa de adopción, medida en mes\(^{-1}\).
 
-La solución analítica es:
+La solución exacta del modelo es:
 
-\[
+$$
 A(t)=A_{\max}-(A_{\max}-A_0)e^{-kt}
-\]
+$$
 
-Su derivada es \(k(A_{\max}-A_0)e^{-kt}=k(A_{\max}-A(t))\), y al evaluar \(t=0\) se obtiene \(A(0)=A_0\); por tanto, satisface la ecuación y la condición inicial.
+La expresión parte de \(A_0\) y se aproxima a \(A_{\max}\) con el paso del tiempo. En la aplicación la usamos como referencia para comparar los resultados calculados con Heun y RK4.
 
 ## Métodos y resultados
 
